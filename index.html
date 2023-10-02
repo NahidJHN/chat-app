@@ -67,7 +67,6 @@
       const videoElement = document.querySelector("video#localVideo");
 
       select.addEventListener("change", (event) => {
-        console.log(event.target.value);
         const constraints = {
           video: { deviceId: { exact: event.target.value } },
           audio: true,
@@ -86,15 +85,7 @@
         }
 
         window.navigator.mediaDevices
-          .getUserMedia({
-            video: {
-              echoCancellation: true,
-              noiseSuppression: true,
-              frameRate: { ideal: 10, max: 15 },
-            },
-            audio: true,
-            preferCurrentTab: true,
-          })
+          .getUserMedia(constraints)
           .then((stream) => {
             videoElement.srcObject = stream;
           })
