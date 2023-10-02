@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Document</title>
+    <style>
+      #localVideo {
+        transform: scaleX(-1); /* Flip the video horizontally */
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      style="
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: black;
+        height: 70vh;
+        width: 80vw;
+      "
+    >
+      <video width="100%" id="localVideo" autoplay playsinline></video>
+      <button id="startButton">Start Video</button>
+
+    </div>
+
+    <script>
+      // Fetch an array of devices of a certain type
+
+      document.querySelector('#startButton').addEventListener('click', () => {
+        
+          async function getConnectedDevices(type) {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            return devices.filter((device) => device.kind === type);
+          }
+    
+          
+          const constraints = { video: true, audio: true };
+
+          window.navigator.mediaDevices
+            .getUserMedia({
+                video: {
+                    echoCancellation:true,
+                    noiseSuppression:true,
+                    frameRate: { ideal: 10, max: 15 },
+                    
+                },
+                audio: true,
+                preferCurrentTab:true
+            })
+            .then((stream) => {
+              const videoElement = document.querySelector("video#localVideo");
+              videoElement.srcObject = stream;
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+      })
+    </script>
+  </body>
+</html>
