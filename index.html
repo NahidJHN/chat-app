@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1"
+    />
     <title>Document</title>
     <style>
       #localVideo {
@@ -17,59 +20,88 @@
         justify-content: center;
         align-items: center;
         background-color: black;
-        height: 70vh;
         width: 80vw;
       "
     >
       <video width="100%" id="localVideo" autoplay playsinline></video>
       <button id="startButton">Start Video</button>
-      
-
     </div>
-<div>
-  <h4 id="countCamera"></h4>
-</div>
+    <div>
+      <h3 id="countCamera"></h3>
+      <h4>select camera</h4>
+      <select id="cameras">
+        <option value="default">Default</option>
+      </select>
+    </div>
     <script>
       // Fetch an array of devices of a certain type
 
       async function getConnectedDevices(type) {
-            const devices = await navigator.mediaDevices.enumerateDevices()
-            return devices.filter((device) => device.kind === type);
-          }
-    
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        return devices.filter((device) => device.kind === type);
+      }
 
-  const countCam=document.querySelector('#countCamera')
-  getConnectedDevices('videoinput').then((cameras) => {
-  countCam.innerHTML=`${cameras.length} cameras found`
-})
+      const countCam = document.querySelector("#countCamera");
+      const select = document.querySelector("#cameras");
 
+      getConnectedDevices("videoinput").then((cameras) => {
+        const html = cameras
+          .map(
+            (camera, index) =>
+              `<option value="${camera.deviceId}">${camera.label}</option>`
+          )
+          .join("");
 
+        select.innerHTML = html;
+        countCam.innerHTML = `Total Camera: ${cameras.length}`;
+      });
 
-      document.querySelector('#startButton').addEventListener('click', () => {
-        
-      
-          
-          const constraints = { video: true, audio: true };
+      document
+        .querySelector("#startButton")
+        .addEventListener("click", () =>
+          getStream({ video: true, audio: true })
+        );
 
-          window.navigator.mediaDevices
-            .getUserMedia({
-                video: {
-                    echoCancellation:true,
-                    noiseSuppression:true,
-                    frameRate: { ideal: 10, max: 15 },
-                    
-                },
-                audio: true,
-                preferCurrentTab:true
-            })
-            .then((stream) => {
-              const videoElement = document.querySelector("video#localVideo");
-              videoElement.srcObject = stream;
-            })
-            .catch((err) => {
-              console.log(err);
-            });
-      })
+      //switch camera
+
+      const videoElement = document.querySelector("video#localVideo");
+
+      select.addEventListener("change", (event) => {
+        console.log(event.target.value);
+        const constraints = {
+          video: { deviceId: { exact: event.target.value } },
+          audio: true,
+        };
+        getStream(constraints);
+      });
+
+      function getStream(constraints) {
+        // Stop the current stream
+        const stream = videoElement.srcObject;
+        if (stream) {
+          const tracks = stream.getTracks();
+          tracks.forEach((track) => {
+            track.stop();
+          });
+        }
+
+        window.navigator.mediaDevices
+          .getUserMedia({
+            video: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              frameRate: { ideal: 10, max: 15 },
+            },
+            audio: true,
+            preferCurrentTab: true,
+          })
+          .then((stream) => {
+            videoElement.srcObject = stream;
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
     </script>
   </body>
 </html>
