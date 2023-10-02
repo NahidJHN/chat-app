@@ -23,19 +23,31 @@
     >
       <video width="100%" id="localVideo" autoplay playsinline></video>
       <button id="startButton">Start Video</button>
+      
 
     </div>
-
+<div>
+  <h4 id="countCamera"></h4>
+</div>
     <script>
       // Fetch an array of devices of a certain type
 
-      document.querySelector('#startButton').addEventListener('click', () => {
-        
-          async function getConnectedDevices(type) {
-            const devices = await navigator.mediaDevices.enumerateDevices();
+      async function getConnectedDevices(type) {
+            const devices = await navigator.mediaDevices.enumerateDevices()
             return devices.filter((device) => device.kind === type);
           }
     
+
+  const countCam=document.querySelector('#countCamera')
+  getConnectedDevices('videoinput').then((cameras) => {
+  countCam.innerHTML=`${cameras.length} cameras found`
+})
+
+
+
+      document.querySelector('#startButton').addEventListener('click', () => {
+        
+      
           
           const constraints = { video: true, audio: true };
 
