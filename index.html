@@ -9,85 +9,30 @@
     <title>Document</title>
   </head>
   <body>
-    <div
-      style="
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-color: black;
-        width: 80vw;
-      "
-    >
-      <video width="100%" id="localVideo" autoplay playsinline></video>
-      <button id="startButton">Start Video</button>
-    </div>
-    <div>
-      <h3 id="countCamera"></h3>
-      <h4>select camera</h4>
-      <select id="cameras">
-        <option value="default">Default</option>
-      </select>
-    </div>
-    <script>
-      // Fetch an array of devices of a certain type
+    <ul id="renderMessage"></ul>
+    <input type="text" id="messageInput" />
 
-      async function getConnectedDevices(type) {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        return devices.filter((device) => device.kind === type);
-      }
+    <script type="module">
+      import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
 
-      const countCam = document.querySelector("#countCamera");
-      const select = document.querySelector("#cameras");
+      const socket = io("http://localhost:5050");
 
-      getConnectedDevices("videoinput").then((cameras) => {
-        const html = cameras
-          .map(
-            (camera, index) =>
-              `<option value="${camera.deviceId}">${camera.label}</option>`
-          )
-          .join("");
+      const messageInput = document.getElementById("messageInput");
+      const renderMessage = document.getElementById("renderMessage");
 
-        select.innerHTML = html;
-        countCam.innerHTML = `Total Camera: ${cameras.length}`;
+      messageInput.oninput = () => {
+        socket.emit("createMessage", {
+          message: messageInput.value,
+        });
+      };
+
+      socket.on("createMessage", (data) => {
+        console.log(data); // "G5p5..."
       });
 
-      document
-        .querySelector("#startButton")
-        .addEventListener("click", () =>
-          getStream({ video: true, audio: true })
-        );
-
-      //switch camera
-
-      const videoElement = document.querySelector("video#localVideo");
-
-      select.addEventListener("change", (event) => {
-        const constraints = {
-          video: { deviceId: { exact: event.target.value } },
-          audio: true,
-        };
-        getStream(constraints);
+      socket.on("disconnect", () => {
+        console.log(socket.id); // undefined
       });
-
-      function getStream(constraints) {
-        // Stop the current stream
-        const stream = videoElement.srcObject;
-        if (stream) {
-          const tracks = stream.getTracks();
-          tracks.forEach((track) => {
-            track.stop();
-          });
-        }
-
-        window.navigator.mediaDevices
-          .getUserMedia(constraints)
-          .then((stream) => {
-            videoElement.srcObject = stream;
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      }
     </script>
   </body>
 </html>
