@@ -9,6 +9,7 @@ import { AuthModule } from "./features/auth/auth.module";
 import { AcceptLanguageResolver, I18nModule, QueryResolver } from "nestjs-i18n";
 import { MessageModule } from "./features/message/message.module";
 import { ConversationModule } from './features/conversation/conversation.module';
+import { ChatModule } from './features/chat/chat.module';
 import * as path from "path";
 
 @Module({
@@ -45,6 +46,7 @@ import * as path from "path";
     AuthModule,
     MessageModule,
     ConversationModule,
+    ChatModule,
   ],
   controllers: [],
   providers: [],

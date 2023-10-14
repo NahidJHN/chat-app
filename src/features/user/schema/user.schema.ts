@@ -20,6 +20,12 @@ export class User extends Document {
   @Prop({ type: String })
   avatar: string;
 
+  @Prop({ type: Boolean })
+  isOnline: boolean;
+
+  @Prop({ type: Date })
+  lastActiveTime: Date;
+
   @Prop({ type: String, enum: UserStatusEnum, default: UserStatusEnum.ACTIVE })
   status: UserStatusEnum;
 }

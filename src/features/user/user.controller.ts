@@ -1,8 +1,9 @@
 import { Controller, Post, Body, Get, Query, Param } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { CreateUserDto } from "./dto/create-user.dto";
-import { Public } from "../common";
+import { IAuthUser, Public } from "../common";
 import { Types } from "mongoose";
+import { AuthUser } from "../common/decorator/authUser.decorator";
 
 @Controller("users")
 export class UserController {
@@ -16,14 +17,27 @@ export class UserController {
   }
 
   @Get()
-  async getUsers(@Query("name") name: string) {
-    const data = await this.userService.getUsers(name);
-    return { data };
+  async getUsers(@Query("name") name: string, @AuthUser() authUser: IAuthUser) {
+    console.log(authUser);
+    const data = await this.userService.getUsers(name, authUser);
+    return data;
   }
 
   @Get(":userId")
   async getUsersById(@Param("userId") id: Types.ObjectId) {
     const data = await this.userService.getUserById(id);
+    return data;
+  }
+
+  @Get(":userId/:conversationId")
+  async getParticipantConverasationId(
+    @Param("userId") userId: Types.ObjectId,
+    @Param("conversationId") conversationId: Types.ObjectId
+  ) {
+    const data = await this.userService.getParticipantUser(
+      userId,
+      conversationId
+    );
     return data;
   }
 }

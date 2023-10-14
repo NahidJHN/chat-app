@@ -13,9 +13,9 @@ export class MessageService {
     private readonly messageModel: Model<Message>
   ) {}
 
-  async create(createMessageDto: CreateMessageDto) {
+  async create(createMessageDto: CreateMessageDto): Promise<Message> {
     const newMessage = new this.messageModel(createMessageDto);
-    return createMessageDto;
+    return newMessage.save();
   }
 
   async findAll(conversationId: Types.ObjectId): Promise<Message[]> {
