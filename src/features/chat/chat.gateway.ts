@@ -45,7 +45,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // Emit the list of connected clients to all clients.
     const connectedClientList = Array.from(this.connectedClients);
-
     this.server.emit("onConnection", connectedClientList);
   }
 
@@ -67,13 +66,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage("chat")
   async create(@MessageBody() createChatDto: CreateChatDto) {
-    const message = await this.chatService.create(createChatDto);
-    this.server.emit("chat", message);
+    const socketId = createChatDto.socketId;
+    const { message, conversation } = await this.chatService.create(
+      createChatDto
+    );
+    this.server.to(socketId).emit("message", message);
+    this.server.emit("conversation", conversation);
+    return message;
   }
 
-  @SubscribeMessage("findAllChat")
-  findAll() {
-    return this.chatService.findAll();
+  @SubscribeMessage("readText")
+  async readText(@MessageBody() conversation: Types.ObjectId) {
+    const updateConversation = await this.chatService.updateConversation(
+      conversation
+    );
+    this.server.emit("conversation", updateConversation);
   }
 
   @SubscribeMessage("findOneChat")

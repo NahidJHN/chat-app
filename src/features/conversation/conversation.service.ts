@@ -4,6 +4,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { collectionsName } from "../constant";
 import { Conversation } from "./schema/conversation.schema";
 import { ClientSession, Model, Types } from "mongoose";
+import { UpdateConversationDto } from "./dto/update-conversation.dto";
 
 @Injectable()
 export class ConversationService {
@@ -31,6 +32,55 @@ export class ConversationService {
         select: "name email avatar",
       })
       .exec();
+  }
+
+  async updateConversation(
+    conversationId: Types.ObjectId,
+    content: string,
+    isRead: boolean,
+    session: ClientSession
+  ): Promise<Conversation> {
+    const conversation = await this.conversationModel
+      .findByIdAndUpdate(
+        conversationId,
+        {
+          lastMessage: content,
+          lastUpdate: new Date(),
+          isRead,
+        },
+        { session, new: true }
+      )
+      .populate({
+        path: "creator",
+        select: "name email avatar",
+      })
+      .populate({
+        path: "participant",
+        select: "name email avatar",
+      });
+    return conversation;
+  }
+  async updateIsRead(
+    conversationId: Types.ObjectId,
+    isRead: boolean
+  ): Promise<Conversation> {
+    const conversation = this.conversationModel
+      .findByIdAndUpdate(
+        conversationId,
+        {
+          isRead,
+        },
+        { new: true }
+      )
+      .populate({
+        path: "creator",
+        select: "name email avatar",
+      })
+      .populate({
+        path: "participant",
+        select: "name email avatar",
+      });
+    return conversation;
   }
 
   remove(id: number) {

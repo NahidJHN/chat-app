@@ -20,7 +20,13 @@ export class Conversation extends Document {
   participant: Types.ObjectId;
 
   @Prop({ type: Date, default: Date.now })
-  lastUpdate: User;
+  lastUpdate: Date;
+
+  @Prop({ type: Boolean, default: false })
+  isRead: boolean;
+
+  @Prop({ type: String, default: "" })
+  lastMessage: Types.ObjectId;
 }
 
 export const ConversationSchema = SchemaFactory.createForClass(Conversation);

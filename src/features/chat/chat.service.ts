@@ -4,19 +4,33 @@ import { UpdateChatDto } from "./dto/update-chat.dto";
 import { InjectModel } from "@nestjs/mongoose";
 import { MessageService } from "../message/message.service";
 import { Message } from "../message/schema/message.schema";
+import { Conversation } from "../conversation/schema/conversation.schema";
+import { ConversationService } from "../conversation/conversation.service";
+import { Types } from "mongoose";
 
 @Injectable()
 export class ChatService {
-  constructor(private readonly messageService: MessageService) {}
+  constructor(
+    private readonly messageService: MessageService,
+    private readonly conversationService: ConversationService
+  ) {}
 
-  async create(createChatDto: CreateChatDto): Promise<Message> {
+  async create(
+    createChatDto: CreateChatDto
+  ): Promise<{ message: Message; conversation: Conversation }> {
     delete createChatDto.socketId;
-    const message = await this.messageService.create(createChatDto);
-    return message;
+    const data = await this.messageService.create(createChatDto);
+    return data;
   }
 
-  findAll() {
-    return `This action returns all chat`;
+  async updateConversation(
+    conversationId: Types.ObjectId
+  ): Promise<Conversation> {
+    const conversation = this.conversationService.updateIsRead(
+      conversationId,
+      true
+    );
+    return conversation;
   }
 
   findOne(id: number) {

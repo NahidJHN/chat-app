@@ -4,7 +4,7 @@ import { Types } from "mongoose";
 export class CreateMessageDto {
   @IsNotEmpty({ message: "conversationId is required" })
   @IsMongoId({ message: "Invalid Conversation Id" })
-  conversationId: Types.ObjectId;
+  conversation: Types.ObjectId;
 
   @IsNotEmpty({ message: "senderId is required" })
   @IsMongoId({ message: "Invalid Sender Id" })

@@ -23,9 +23,6 @@ export class Message extends Document {
   @Prop({ required: true, type: String })
   content: string;
 
-  @Prop({ default: false, type: Boolean })
-  isRead: boolean;
-
   @Prop({ type: [String], default: [] })
   attachments: string[]; // Assuming you store attachment URLs
 

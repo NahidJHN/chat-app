@@ -13,5 +13,6 @@ import { collectionsName } from "../constant";
   ],
   controllers: [ConversationController],
   providers: [ConversationService],
+  exports: [ConversationService],
 })
 export class ConversationModule {}

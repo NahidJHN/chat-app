@@ -4,6 +4,6 @@ export class CreateChatDto {
   sender: Types.ObjectId;
   receiver: Types.ObjectId;
   content: string;
-  conversationId: Types.ObjectId;
+  conversation: Types.ObjectId;
   socketId: string;
 }
