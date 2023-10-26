@@ -30,7 +30,7 @@ export class UserController {
   }
 
   @Get(":userId/:conversationId")
-  async getParticipantConverasationId(
+  async getParticipantConversationId(
     @Param("userId") userId: Types.ObjectId,
     @Param("conversationId") conversationId: Types.ObjectId
   ) {
@@ -39,5 +39,10 @@ export class UserController {
       conversationId
     );
     return data;
+  }
+
+  @Get("conversations/participants/:userId/")
+  async getConversationsUser(@Param("userId") userId: string) {
+    return await this.userService.getAllParticipantUser(userId);
   }
 }

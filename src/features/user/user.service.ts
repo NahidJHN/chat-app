@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { InjectModel } from "@nestjs/mongoose";
 import { RolesEnum, collectionsName } from "../constant";
-import { ClientSession, Model, Types } from "mongoose";
+import mongoose, { ClientSession, Model, Types } from "mongoose";
 import { User } from "./schema/user.schema";
 import { Conversation } from "../conversation/schema/conversation.schema";
 import { IAuthUser } from "../common";
@@ -61,6 +61,72 @@ export class UserService {
       }
       return user;
     }
+  }
+
+  async getAllParticipantUser(userId: string): Promise<User[]> {
+    //find the conversation
+    console.log(userId);
+    const users = await this.conversationModel.aggregate([
+      {
+        $match: {
+          $or: [
+            {
+              creator: new Types.ObjectId(userId),
+            },
+            {
+              participant: new Types.ObjectId(userId),
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "users", // Replace 'users' with the actual name of the collection where user information is stored.
+          let: {
+            creatorId: "$creator",
+            participantId: "$participant",
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $or: [
+                    { $eq: ["$_id", "$$creatorId"] },
+                    { $eq: ["$_id", "$$participantId"] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "users",
+        },
+      },
+      {
+        $unwind: "$users",
+      },
+      {
+        $replaceRoot: {
+          newRoot: "$users",
+        },
+      },
+      {
+        $match: {
+          _id: {
+            $ne: new Types.ObjectId(userId),
+          },
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          email: 1,
+          avatar: 1,
+          lastActiveTime: 1,
+          isOnline: 1,
+        },
+      },
+    ]);
+    return users;
   }
 
   async getUser(query: IQuery): Promise<User> {

@@ -5,11 +5,9 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
   WebSocketServer,
-  ConnectedSocket,
 } from "@nestjs/websockets";
 import { ChatService } from "./chat.service";
 import { CreateChatDto } from "./dto/create-chat.dto";
-import { UpdateChatDto } from "./dto/update-chat.dto";
 import { UserService } from "../user/user.service";
 import { Types } from "mongoose";
 import { Server, Socket } from "socket.io";
@@ -25,7 +23,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @WebSocketServer()
   server: Server;
-
   constructor(
     private readonly chatService: ChatService,
     private readonly userService: UserService
@@ -40,12 +37,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.connectedClients.push({ _id: userId, socketId });
 
     // Handle active status.
-    const user = await this.userService.handleActiveUser(userId, true);
-    user["socketId"] = socketId;
+    await this.userService.handleActiveUser(userId, true);
 
     // Emit the list of connected clients to all clients.
-    const connectedClientList = Array.from(this.connectedClients);
-    this.server.emit("onConnection", connectedClientList);
+    this.server.emit("onConnection", this.connectedClients);
   }
 
   @SubscribeMessage("onDisConnection")
@@ -59,6 +54,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (index !== -1) {
       this.connectedClients.splice(index, 1);
     }
+
+    // Handle active status.
+    await this.userService.handleActiveUser(userId, false);
+
     // Emit the list of connected clients after the disconnect.
     const connectedClientList = Array.from(this.connectedClients);
     this.server.emit("onDisConnection", connectedClientList);
@@ -83,18 +82,36 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.emit("conversation", updateConversation);
   }
 
-  @SubscribeMessage("findOneChat")
-  findOne(@MessageBody() id: number) {
-    return this.chatService.findOne(id);
+  @SubscribeMessage("ice-candidate")
+  handleICECandidate(
+    _client: any,
+    data: { candidate: RTCIceCandidate; to: string; _id: string }
+  ): void {
+    console.log(data);
+    // Forward ICE candidates to the recipient in the room
+    this.server.to(data.to).emit("ice-candidate", data);
   }
 
-  @SubscribeMessage("updateChat")
-  update(@MessageBody() updateChatDto: UpdateChatDto) {
-    return this.chatService.update(updateChatDto.id, updateChatDto);
+  @SubscribeMessage("signaling")
+  handleOffer(
+    _client: any,
+    data: {
+      offer: RTCSessionDescription;
+      to: string;
+      _id: string;
+    }
+  ): void {
+    console.log("signaling", data);
+    // Forward offers to the recipient in the room
+    this.server.to(data.to).emit("signaling", data);
   }
 
-  @SubscribeMessage("removeChat")
-  remove(@MessageBody() id: number) {
-    return this.chatService.remove(id);
+  @SubscribeMessage("answer")
+  handleAnswer(
+    _client: any,
+    data: { answer: RTCSessionDescription; to: string }
+  ): void {
+    // Forward answers to the caller in the room
+    this.server.to(data.to).emit("answer", data);
   }
 }
