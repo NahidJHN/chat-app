@@ -18,7 +18,6 @@ export class ChatService {
   async create(
     createChatDto: CreateChatDto
   ): Promise<{ message: Message; conversation: Conversation }> {
-    delete createChatDto.socketId;
     const data = await this.messageService.create(createChatDto);
     return data;
   }

@@ -11,6 +11,7 @@ import { CreateChatDto } from "./dto/create-chat.dto";
 import { UserService } from "../user/user.service";
 import { Types } from "mongoose";
 import { Server, Socket } from "socket.io";
+import { Message } from "../message/schema/message.schema";
 
 @WebSocketGateway({
   cors: {
@@ -63,15 +64,29 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.emit("onDisConnection", connectedClientList);
   }
 
+  @SubscribeMessage("chat-room")
+  async joinRoom(client: Socket, body: { conversationId: Types.ObjectId }) {
+    if (body.conversationId) {
+      client.join(body.conversationId.toString());
+    }
+  }
+
+  @SubscribeMessage("leave-chat-room")
+  async leaveRoom(client: Socket, body: { conversationId: Types.ObjectId }) {
+    if (body.conversationId) {
+      client.leave(body.conversationId.toString());
+    }
+  }
+
   @SubscribeMessage("chat")
-  async create(@MessageBody() createChatDto: CreateChatDto) {
-    const socketId = createChatDto.socketId;
-    const { message, conversation } = await this.chatService.create(
-      createChatDto
-    );
-    this.server.to(socketId).emit("message", message);
-    this.server.emit("conversation", conversation);
-    return message;
+  async createChat(@MessageBody() createChatDto: CreateChatDto): Promise<void> {
+    const data = await this.chatService.create(createChatDto);
+    this.server
+      .to(createChatDto.conversation.toString())
+      .emit("chat", data.message);
+    this.server
+      .to(createChatDto.conversation.toString())
+      .emit("conversation", data.conversation);
   }
 
   @SubscribeMessage("readText")

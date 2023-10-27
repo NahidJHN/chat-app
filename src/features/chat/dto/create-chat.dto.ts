@@ -5,5 +5,4 @@ export class CreateChatDto {
   receiver: Types.ObjectId;
   content: string;
   conversation: Types.ObjectId;
-  socketId: string;
 }
