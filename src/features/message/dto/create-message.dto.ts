@@ -10,10 +10,6 @@ export class CreateMessageDto {
   @IsMongoId({ message: "Invalid Sender Id" })
   sender: Types.ObjectId;
 
-  @IsNotEmpty({ message: "senderId is required" })
-  @IsMongoId({ message: "Invalid Receiver Id" })
-  receiver: Types.ObjectId;
-
   @IsNotEmpty({ message: "content is required" })
   @IsString({ message: "Invalid Content" })
   content: string;

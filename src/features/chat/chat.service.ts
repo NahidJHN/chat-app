@@ -23,11 +23,12 @@ export class ChatService {
   }
 
   async updateConversation(
+    userId: Types.ObjectId,
     conversationId: Types.ObjectId
   ): Promise<Conversation> {
     const conversation = this.conversationService.updateIsRead(
-      conversationId,
-      true
+      userId,
+      conversationId
     );
     return conversation;
   }

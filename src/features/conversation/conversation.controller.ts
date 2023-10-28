@@ -3,6 +3,8 @@ import { ConversationService } from "./conversation.service";
 import { Types } from "mongoose";
 import { Conversation } from "./schema/conversation.schema";
 import { CreateConversationDto } from "./dto/create-conversation.dto";
+import { GroupConversation } from "./schema/group-conversation.schema";
+import { PrivateConversation } from "./schema/private-conversation.schema";
 
 @Controller("conversations")
 export class ConversationController {
@@ -22,8 +24,30 @@ export class ConversationController {
     return data;
   }
 
-  @Delete(":id")
-  remove(@Param("id") id: string) {
-    return this.conversationService.remove(+id);
+  @Get("group/:userId")
+  async getGroupConversations(
+    @Param("userId") userId: Types.ObjectId
+  ): Promise<GroupConversation[]> {
+    const data = await this.conversationService.findGroupConversations(userId);
+    return data;
+  }
+
+  @Get("private/:userId")
+  async getPrivateConversations(
+    @Param("userId") userId: Types.ObjectId
+  ): Promise<PrivateConversation[]> {
+    const data = await this.conversationService.findPrivateConversations(
+      userId
+    );
+    return data;
+  }
+
+  @Get("participants/:userId")
+  async getParticipantByUserId(
+    @Param("userId") userId: Types.ObjectId
+  ): Promise<Conversation[]> {
+    const data = await this.conversationService.findAllParticipants(userId);
+    console.log(data);
+    return data;
   }
 }

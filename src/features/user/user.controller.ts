@@ -28,21 +28,4 @@ export class UserController {
     const data = await this.userService.getUserById(id);
     return data;
   }
-
-  @Get(":userId/:conversationId")
-  async getParticipantConversationId(
-    @Param("userId") userId: Types.ObjectId,
-    @Param("conversationId") conversationId: Types.ObjectId
-  ) {
-    const data = await this.userService.getParticipantUser(
-      userId,
-      conversationId
-    );
-    return data;
-  }
-
-  @Get("conversations/participants/:userId/")
-  async getConversationsUser(@Param("userId") userId: string) {
-    return await this.userService.getAllParticipantUser(userId);
-  }
 }

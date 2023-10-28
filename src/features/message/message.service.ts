@@ -4,7 +4,6 @@ import { collectionsName } from "../constant";
 import { InjectConnection, InjectModel } from "@nestjs/mongoose";
 import { Message } from "./schema/message.schema";
 import { CreateMessageDto } from "./dto/create-message.dto";
-import { UpdateMessageDto } from "./dto/update-message.dto";
 import { Conversation } from "../conversation/schema/conversation.schema";
 import { ConversationService } from "../conversation/conversation.service";
 
@@ -26,14 +25,15 @@ export class MessageService {
     try {
       session.startTransaction();
       const newMessage = new this.messageModel(createMessageDto);
+      await newMessage.save({ session });
 
       const conversation = await this.conversationService.updateConversation(
+        createMessageDto.sender,
         createMessageDto.conversation,
-        createMessageDto.content,
-        false,
+        newMessage._id,
         session
       );
-      await newMessage.save({ session });
+
       await session.commitTransaction();
 
       return { message: newMessage, conversation };
@@ -47,17 +47,5 @@ export class MessageService {
 
   async findAll(conversationId: Types.ObjectId): Promise<Message[]> {
     return this.messageModel.find({ conversation: conversationId }).exec();
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} message`;
-  }
-
-  update(id: number, updateMessageDto: UpdateMessageDto) {
-    return `This action updates a #${id} message`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} message`;
   }
 }

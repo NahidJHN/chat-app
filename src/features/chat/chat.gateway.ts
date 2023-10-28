@@ -90,11 +90,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage("readText")
-  async readText(@MessageBody() conversation: Types.ObjectId) {
+  async readText(
+    @MessageBody() conversation: { _id: Types.ObjectId; userId: Types.ObjectId }
+  ) {
     const updateConversation = await this.chatService.updateConversation(
-      conversation
+      conversation.userId,
+      conversation._id
     );
-    this.server.emit("conversation", updateConversation);
+    this.server
+      .to(conversation._id.toString())
+      .emit("conversation", updateConversation);
   }
 
   @SubscribeMessage("ice-candidate")
