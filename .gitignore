@@ -45,3 +45,4 @@ package-json.lock
 
 cert.crt
 cert.key
+.vercel

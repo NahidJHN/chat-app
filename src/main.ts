@@ -18,12 +18,10 @@ import {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
-    // httpsOptions: {
-    //   key: fs.readFileSync(path.join(__dirname, "..", "cert.key")),
-    //   cert: fs.readFileSync(path.join(__dirname, "..", "cert.crt")),
-    // },
   });
-  app.enableCors({ origin: "*" });
+  app.enableCors({
+    origin: ["https://chat-app-fe-lovat.vercel.app/", "http://localhost:3000"],
+  });
   app.setGlobalPrefix("api/v1"); //route prefix
   app.useGlobalPipes(
     new ValidationPipe({
