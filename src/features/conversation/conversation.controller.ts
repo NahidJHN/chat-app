@@ -47,7 +47,6 @@ export class ConversationController {
     @Param("userId") userId: Types.ObjectId
   ): Promise<Conversation[]> {
     const data = await this.conversationService.findAllParticipants(userId);
-    console.log(data);
     return data;
   }
 }
