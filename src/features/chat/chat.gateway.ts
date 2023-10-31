@@ -85,9 +85,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       .to(createChatDto.conversation.toString())
       .emit("chat", data.message);
 
-    this.server
-      .to(createChatDto.conversation.toString())
-      .emit("conversation", data.conversation);
+    this.server.emit("conversation", data.conversation);
   }
 
   @SubscribeMessage("readText")
@@ -99,7 +97,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       conversation._id
     );
 
-    this.server.to(conversation._id.toString()).emit("conversation", data);
+    this.server.emit("conversation", data);
   }
 
   @SubscribeMessage("ice-candidate")
