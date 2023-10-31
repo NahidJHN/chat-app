@@ -84,6 +84,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server
       .to(createChatDto.conversation.toString())
       .emit("chat", data.message);
+
     this.server
       .to(createChatDto.conversation.toString())
       .emit("conversation", data.conversation);
@@ -93,13 +94,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async readText(
     @MessageBody() conversation: { _id: Types.ObjectId; userId: Types.ObjectId }
   ) {
-    const updateConversation = await this.chatService.updateConversation(
+    const data = await this.chatService.updateConversation(
       conversation.userId,
       conversation._id
     );
-    this.server
-      .to(conversation._id.toString())
-      .emit("conversation", updateConversation);
+
+    this.server.to(conversation._id.toString()).emit("conversation", data);
   }
 
   @SubscribeMessage("ice-candidate")
@@ -107,7 +107,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     _client: any,
     data: { candidate: RTCIceCandidate; to: string; _id: string }
   ): void {
-    console.log(data);
     // Forward ICE candidates to the recipient in the room
     this.server.to(data.to).emit("ice-candidate", data);
   }

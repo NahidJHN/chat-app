@@ -20,7 +20,7 @@ async function bootstrap() {
     bufferLogs: true,
   });
   app.enableCors({
-    origin: ["https://chat-app-fe-lovat.vercel.app/", "http://localhost:3000"],
+    origin: ["https://chat-app-c583f.web.app", "http://localhost:3000"],
   });
   app.setGlobalPrefix("api/v1"); //route prefix
   app.useGlobalPipes(
