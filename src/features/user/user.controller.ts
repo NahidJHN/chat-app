@@ -23,6 +23,12 @@ export class UserController {
     return data;
   }
 
+  @Public()
+  @Get("health")
+  async healthCheck() {
+    return "OK";
+  }
+
   @Get(":userId")
   async getUsersById(@Param("userId") id: Types.ObjectId) {
     const data = await this.userService.getUserById(id);
