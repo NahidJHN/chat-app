@@ -11,6 +11,9 @@ import { MessageModule } from "./features/message/message.module";
 import { ConversationModule } from "./features/conversation/conversation.module";
 import { ChatModule } from "./features/chat/chat.module";
 import * as path from "path";
+import { TasksService } from "./jobs/keep-alive-service";
+import { HttpModule } from "@nestjs/axios";
+import { ScheduleModule } from "@nestjs/schedule";
 
 @Module({
   imports: [
@@ -41,6 +44,8 @@ import * as path from "path";
         AcceptLanguageResolver,
       ],
     }),
+    HttpModule,
+    ScheduleModule.forRoot(),
     CommonModule,
     UserModule,
     AuthModule,
@@ -49,6 +54,6 @@ import * as path from "path";
     ChatModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [TasksService],
 })
 export class AppModule {}

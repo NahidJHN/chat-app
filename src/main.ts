@@ -20,7 +20,11 @@ async function bootstrap() {
     bufferLogs: true,
   });
   app.enableCors({
-    origin: ["https://chat-app-c583f.web.app", "http://localhost:3000"],
+    origin: [
+      "https://chat-app-c583f.web.app",
+      "http://localhost:3000",
+      "https://chat-app-sn3m.onrender.com",
+    ],
   });
   app.setGlobalPrefix("api/v1"); //route prefix
   app.useGlobalPipes(
