@@ -1,10 +1,20 @@
-import { Controller, Get, Post, Body, Param, Delete } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Query,
+} from "@nestjs/common";
 import { ConversationService } from "./conversation.service";
 import { Types } from "mongoose";
 import { Conversation } from "./schema/conversation.schema";
 import { CreateConversationDto } from "./dto/create-conversation.dto";
 import { GroupConversation } from "./schema/group-conversation.schema";
 import { PrivateConversation } from "./schema/private-conversation.schema";
+import { IAuthUser } from "../common";
+import { AuthUser } from "../common/decorator/authUser.decorator";
 
 @Controller("conversations")
 export class ConversationController {
@@ -47,6 +57,18 @@ export class ConversationController {
     @Param("userId") userId: Types.ObjectId
   ): Promise<Conversation[]> {
     const data = await this.conversationService.findAllParticipants(userId);
+    return data;
+  }
+
+  @Get("active/:conversationId")
+  async getActiveParticipants(
+    @Param("conversationId") conversationId: Types.ObjectId,
+    @AuthUser() user: IAuthUser
+  ): Promise<any> {
+    const data = await this.conversationService.getActiveConversation(
+      conversationId,
+      user._id
+    );
     return data;
   }
 }

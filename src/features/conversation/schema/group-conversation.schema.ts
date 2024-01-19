@@ -7,7 +7,6 @@ export class GroupConversation extends Document {
   @Prop({
     type: String,
     required: true,
-    ref: collectionsName.user,
   })
   name: string;
 

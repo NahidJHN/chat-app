@@ -12,7 +12,6 @@ export class TasksService {
       const data = await this.httpService.axiosRef.get(
         "https://chat-app-sn3m.onrender.com/api/v1/users/health"
       );
-      console.log(data.data);
     } catch (error) {
       throw error;
     }

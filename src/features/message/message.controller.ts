@@ -1,7 +1,7 @@
 import { MessageService } from "./message.service";
 
 import { CreateMessageDto } from "./dto/create-message.dto";
-import { Body, Controller, Get, Param, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
 import { Types } from "mongoose";
 
 @Controller("messages")
@@ -15,7 +15,10 @@ export class MessageController {
   }
 
   @Get(":conversationId")
-  async findAll(@Param("conversationId") conversationId: Types.ObjectId) {
-    return await this.messageService.findAll(conversationId);
+  async findAll(
+    @Param("conversationId") conversationId: Types.ObjectId,
+    @Query("page") page: string
+  ) {
+    return await this.messageService.findAll(conversationId, page);
   }
 }

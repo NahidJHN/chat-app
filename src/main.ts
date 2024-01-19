@@ -1,3 +1,4 @@
+declare const module: any;
 import * as fs from "fs";
 import * as path from "path";
 import * as yaml from "js-yaml";
@@ -16,9 +17,7 @@ import {
 } from "./features/common";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    bufferLogs: true,
-  });
+  const app = await NestFactory.create(AppModule);
   app.enableCors({
     origin: [
       "https://chat-app-c583f.web.app",
@@ -60,5 +59,10 @@ async function bootstrap() {
 
   await app.listen(5050);
   console.log(`Application is running on: ${await app.getUrl()}`);
+
+  if (module.hot) {
+    module.hot.accept({});
+    module.hot.dispose(() => app.close());
+  }
 }
 bootstrap();

@@ -12,12 +12,6 @@ export class PrivateConversation extends Document {
   creator: Types.ObjectId;
 
   @Prop({
-    type: String,
-    required: true,
-  })
-  name: string;
-
-  @Prop({
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: collectionsName.user,

@@ -26,7 +26,7 @@ export class ChatService {
     userId: Types.ObjectId,
     conversationId: Types.ObjectId
   ): Promise<Conversation> {
-    const conversation = this.conversationService.updateIsRead(
+    const conversation = await this.conversationService.updateIsRead(
       userId,
       conversationId
     );

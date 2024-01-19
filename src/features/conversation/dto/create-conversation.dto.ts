@@ -2,7 +2,6 @@ import {
   IsMongoId,
   IsNotEmpty,
   IsArray,
-  ValidateNested,
   IsEnum,
   IsOptional,
   IsString,

@@ -45,7 +45,17 @@ export class MessageService {
     }
   }
 
-  async findAll(conversationId: Types.ObjectId): Promise<Message[]> {
-    return this.messageModel.find({ conversation: conversationId }).exec();
+  async findAll(
+    conversationId: Types.ObjectId,
+    page: string
+  ): Promise<Message[]> {
+    const pageCount = Number(page || 0) - 1;
+
+    return this.messageModel
+      .find({ conversation: conversationId })
+      .limit(10)
+      .skip(pageCount * 10)
+      .sort({ createdAt: -1 })
+      .exec();
   }
 }

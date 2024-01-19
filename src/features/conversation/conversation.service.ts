@@ -1,9 +1,9 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { CreateConversationDto } from "./dto/create-conversation.dto";
 import { InjectConnection, InjectModel } from "@nestjs/mongoose";
 import { collectionsName } from "../constant";
 import { Conversation } from "./schema/conversation.schema";
-import { ClientSession, Connection, Model, Types } from "mongoose";
+import { ClientSession, Connection, Model, SchemaTypes, Types } from "mongoose";
 import { GroupConversation } from "./schema/group-conversation.schema";
 import { PrivateConversation } from "./schema/private-conversation.schema";
 
@@ -74,6 +74,8 @@ export class ConversationService {
           $in: [userId],
         },
       })
+      .sort({ lastUpdate: -1 })
+
       .populate("lastMessage")
       .exec();
     return data;
@@ -101,7 +103,7 @@ export class ConversationService {
     return data;
   }
 
-  //fine the participant from the conversation and return all participant only
+  //find the participant from the conversation and return all participant only
   async findAllParticipants(userId: Types.ObjectId): Promise<Conversation[]> {
     const conversation = await this.conversationModel.aggregate([
       {
@@ -148,7 +150,7 @@ export class ConversationService {
     messageId: Types.ObjectId,
     session: ClientSession
   ): Promise<Conversation> {
-    const conversation = this.conversationModel
+    const conversation = await this.conversationModel
       .findByIdAndUpdate(
         conversationId,
         {
@@ -162,7 +164,7 @@ export class ConversationService {
       )
       .populate("lastMessage")
       .exec();
-
+    console.log("conversation======>", conversation);
     return conversation;
   }
 
@@ -176,7 +178,68 @@ export class ConversationService {
         { $push: { readPersons: userId } },
         { new: true }
       )
-      .populate("lastMessage");
+      .populate("lastMessage")
+      .exec();
+    console.log("read======>", conversation);
+    return conversation;
+  }
+
+  async getActiveConversation(
+    conversationId: Types.ObjectId,
+    userId: Types.ObjectId
+  ) {
+    const findConversation = await this.conversationModel
+      .findById(conversationId)
+      .populate({
+        path: "lastMessage",
+        select: "content attachments sender conversation createdAt",
+      });
+
+    const conversation = findConversation.toObject();
+
+    if (conversation.type === "group") {
+      const groupConversation = await this.groupConversationModel
+        .findById(conversation.groupConversation)
+        .populate({
+          path: "members",
+          select: "name isOnline _id",
+        });
+      if (groupConversation) {
+        conversation["isOnline"] = groupConversation.members.some(
+          (member) => member["isOnline"]
+        );
+        conversation["name"] = groupConversation.name;
+      }
+    }
+
+    if (conversation.type === "dual") {
+      const privateConversation = await this.privateConversationModel
+        .findById(conversation.privateConversation)
+        .populate({
+          path: "participant",
+          select: "name isOnline _id lastActiveTime avatar",
+        })
+        .populate({
+          path: "creator",
+          select: "name isOnline _id lastActiveTime avatar",
+        });
+      if (privateConversation) {
+        const participant =
+          privateConversation.creator._id.toString() === userId.toString()
+            ? privateConversation.participant
+            : privateConversation.creator;
+
+        conversation["name"] = participant["name"];
+        conversation["isOnline"] = participant["isOnline"];
+        conversation["lastActiveTime"] = participant["lastActiveTime"];
+        conversation["avatar"] = participant["avatar"];
+      }
+    }
+
+    //remove the userId from the conversation participant array
+    conversation.participants = conversation.participants.filter(
+      (participant) => participant["_id"].toString() !== userId.toString()
+    );
 
     return conversation;
   }
